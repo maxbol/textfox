@@ -127,6 +127,10 @@ in {
               };
             };
           };
+          includeCss = lib.mkOption {
+            type = lib.types.str;
+            description = "Path to a custom css file to include";
+          };
         };
       };
     };
@@ -148,6 +152,11 @@ in {
     home.file.".mozilla/firefox/${cfg.profile}/chrome/config.css" = {
       text = lib.strings.concatStrings [
         ":root {"
+        (if cfg.config.includeCss != null then
+          ''
+          @import url("${cfg.config.includeCss}");
+          ''
+        else "")
         (lib.strings.concatStrings [ " --tf-font-family: " cfg.config.font.family ";" ])
         (lib.strings.concatStrings [ " --tf-font-size: " cfg.config.font.size ";" ])
         (lib.strings.concatStrings [ " --tf-font-accent: " cfg.config.font.accent ";" ])
