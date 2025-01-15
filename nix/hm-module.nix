@@ -129,6 +129,7 @@ in {
           };
           includeCss = lib.mkOption {
             type = lib.types.str;
+            default = null;
             description = "Path to a custom css file to include";
           };
         };
