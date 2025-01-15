@@ -156,12 +156,12 @@ in {
     };
     home.file."${configDir}${cfg.profile}/chrome/config.css" = {
       text = lib.strings.concatStrings [
-        ":root {"
         (if cfg.config.includeCss != null then
-          ''
-          @import url("${cfg.config.includeCss}");
-          ''
-        else "")
+         ''
+         @import url("${cfg.config.includeCss}");
+         ''
+         else "")
+        ":root {"
         (lib.strings.concatStrings [ " --tf-font-family: " cfg.config.font.family ";" ])
         (lib.strings.concatStrings [ " --tf-font-size: " cfg.config.font.size ";" ])
         (lib.strings.concatStrings [ " --tf-font-accent: " cfg.config.font.accent ";" ])
