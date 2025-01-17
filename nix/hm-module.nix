@@ -179,7 +179,8 @@ in {
             paths = [ configCss package ];
           };
           installPhase = ''
-            SRC_FILES=$(ls chrome/)
+            cd chrome/
+            SRC_FILES=$(ls .)
             mkdir -p $out
             cp -r -L $SRC_FILES $out
           '';
