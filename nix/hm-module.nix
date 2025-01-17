@@ -179,11 +179,13 @@ in {
             paths = [ configCss package ];
           };
           installPhase = ''
-            cp -r -L $src/* $out
+            SRC_FILES=$(ls chrome/)
+            mkdir -p $out
+            cp -r -L $SRC_FILES $out
           '';
         };
     in {
-      source = "${finalChrome}/chrome";
+      source = "${finalChrome}";
     };
   };
 }
