@@ -185,7 +185,7 @@ in {
           '';
         };
     in {
-      source = finalChrome;
+      source = "${finalChrome}/chrome";
     };
   };
 }
