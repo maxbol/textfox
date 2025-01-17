@@ -181,7 +181,7 @@ in {
           installPhase = ''
             SRC_FILES=$(ls .)
             mkdir -p $out/chrome
-            cp -r $SRC_FILES $out
+            cp -r -L $SRC_FILES $out
           '';
         };
     in {
