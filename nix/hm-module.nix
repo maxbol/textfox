@@ -145,31 +145,41 @@ in {
       };
     };
 
-    home.file."${configDir}${cfg.profile}/chrome" = {
-      source = "${package}/chrome";
-      recursive = true;
-    };
-    home.file."${configDir}${cfg.profile}/chrome/config.css" = {
-      text = lib.strings.concatStrings [
-        ":root {"
-        (lib.strings.concatStrings [ " --tf-font-family: " cfg.config.font.family ";" ])
-        (lib.strings.concatStrings [ " --tf-font-size: " cfg.config.font.size ";" ])
-        (lib.strings.concatStrings [ " --tf-font-accent: " cfg.config.font.accent ";" ])
-        (lib.strings.concatStrings [ " --tf-background: " cfg.config.background.color ";" ])
-        (lib.strings.concatStrings [ " --tf-border-color: " cfg.config.border.color ";" ])
-        (lib.strings.concatStrings [ " --tf-border-transition: " cfg.config.border.transition ";" ])
-        (lib.strings.concatStrings [ " --tf-border-width: " cfg.config.border.width ";" ])
-        (lib.strings.concatStrings [ " --tf-border-radius: " cfg.config.border.radius ";" ])
-        (lib.strings.concatStrings [ " --tf-sidebery-margin: " cfg.config.sidebery.margin ";" ])
-        (lib.strings.concatStrings [ " --tf-display-horizontal-tabs: " (if cfg.config.displayHorizontalTabs then "block" else "none") ";" ])
-        (lib.strings.concatStrings [ " --tf-display-window-controls: " (if cfg.config.displayWindowControls then "flex" else "none") ";" ])
-        (lib.strings.concatStrings [ " --tf-display-nav-buttons: " (if cfg.config.displayNavButtons then "flex" else "none") ";" ])
-        (lib.strings.concatStrings [ " --tf-display-urlbar-icons: " (if cfg.config.displayUrlbarIcons then "flex" else "none") ";" ])
-        (lib.strings.concatStrings [ " --tf-display-customize-sidebar: " (if cfg.config.displaySidebarTools then "flex" else "none") ";" ])
-        (lib.strings.concatStrings [ " --tf-display-titles: " (if cfg.config.displayTitles then "flex" else "none") ";" ])
-        (lib.strings.concatStrings [ " --tf-newtab-logo: " cfg.config.newtabLogo ";" ])
-        " }"
-      ];
+    home.file."${configDir}${cfg.profile}/chrome" = let
+      configCss = pkgs.writeText "chrome/config.css" ''
+        :root {
+          --tf-font-family: ${cfg.config.font.family};
+          --tf-font-size: ${cfg.config.font.size};
+          --tf-font-accent: ${cfg.config.font.accent};
+          --tf-background: ${cfg.config.background.color};
+          --tf-border-color: ${cfg.config.border.color};
+          --tf-border-transition: ${cfg.config.border.transition};
+          --tf-border-width: ${cfg.config.border.width};
+          --tf-border-radius: ${cfg.config.border.radius};
+          --tf-sidebery-margin: ${cfg.config.sidebery.margin};
+          --tf-display-horizontal-tabs: ${if cfg.config.displayHorizontalTabs then "block" else "none"};
+          --tf-display-window-controls: ${if cfg.config.displayWindowControls then "flex" else "none"};
+          --tf-display-nav-buttons: ${if cfg.config.displayNavButtons then "flex" else "none"};
+          --tf-display-urlbar-icons: ${if cfg.config.displayUrlbarIcons then "flex" else "none"};
+          --tf-display-customize-sidebar: ${if cfg.config.displaySidebarTools then "flex" else "none"};
+          --tf-display-titles: ${if cfg.config.displayTitles then "flex" else "none"};
+          --tf-newtab-logo: ${cfg.config.newtabLogo};
+        }'';
+
+        finalChrome = pkgs.stdenv.mkDerivation {
+          pname = "textfox-profile-chrome";
+          src = pkgs.symlinkJoin {
+            name = "textfox-profile-chrome-src";
+            paths = [ configCss package ];
+          };
+          installPhase = ''
+            SRC_FILES=$(ls .)
+            mkdir -p $out/chrome
+            cp -r $SRC_FILES $out
+          '';
+        };
+    in {
+      source = finalChrome;
     };
   };
 }
