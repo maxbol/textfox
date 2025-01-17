@@ -174,14 +174,12 @@ in {
 
         finalChrome = pkgs.stdenv.mkDerivation {
           name = "textfox-profile-chrome";
-          buildInputs = [
-            configCss
-            package
-          ];
+          src = pkgs.symlinkJoin {
+            name = "textfox-profile-chrome-src";
+            paths = [ configCss package ];
+          };
           installPhase = ''
-            mkdir -p $out
-            cp ${configCss}/config.css $out/config.css
-            cp ${package}/chrome/* $out
+            cp -r -L $src/* $out
           '';
         };
     in {
