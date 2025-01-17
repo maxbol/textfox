@@ -167,7 +167,7 @@ in {
         }'';
 
         finalChrome = pkgs.stdenv.mkDerivation {
-          pname = "textfox-profile-chrome";
+          name = "textfox-profile-chrome";
           src = pkgs.symlinkJoin {
             name = "textfox-profile-chrome-src";
             paths = [ configCss package ];
