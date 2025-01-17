@@ -148,7 +148,7 @@ in {
     home.file."${configDir}${cfg.profile}/chrome" = let
       configCss = pkgs.writeTextFile {
         name = "config.css";
-        destination = "chrome/config.css";
+        destination = "/chrome/config.css";
         executable = false;
         text = ''
           :root {
