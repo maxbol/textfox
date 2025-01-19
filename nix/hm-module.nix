@@ -149,6 +149,7 @@ in {
 
   config = let
     configCss = pkgs.writeText "config.css" (lib.strings.concatStrings [
+      (if cfg.config.customCss != null then "\n${cfg.config.customCss}" else "")
       ":root {"
       (lib.strings.concatStrings [ " --tf-font-family: " cfg.config.font.family ";" ])
       (lib.strings.concatStrings [ " --tf-font-size: " cfg.config.font.size ";" ])
@@ -167,7 +168,6 @@ in {
       (lib.strings.concatStrings [ " --tf-display-titles: " (if cfg.config.displayTitles then "flex" else "none") ";" ])
       (lib.strings.concatStrings [ " --tf-newtab-logo: " cfg.config.newtabLogo ";" ])
       " }"
-      (if cfg.config.customCss != null then "\n${cfg.config.customCss}" else "")
     ]);
 
     linkCfg = {
