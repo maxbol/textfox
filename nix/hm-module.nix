@@ -170,7 +170,7 @@ in {
       };
 
       home.file."${configDir}${cfg.profile}/chrome/config.css" = {
-        text = configCss;
+        source = configCss;
       };
     };
 
