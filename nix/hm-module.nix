@@ -181,7 +181,8 @@ in {
         GAWK="${pkgs.gawk.out}/bin/awk"
 
         cd "${package}"
-        INSTALL_FILES=$(find . -type f | grep ./chrome)
+        SRC_FILES=$(find . -type f | grep ./chrome)
+        INSTALL_FILES=()
 
         echo "Copying textfox chrome css to $HOME/$PROFILE_DIR";
 
@@ -203,9 +204,11 @@ in {
             echo "Textfox couldn't install itself: File $PROFILE_DIR/chrome/config.css already exists and has a different content than the one in the package"
             exit 1
           fi
+        else
+          INSTALL_FILES+=("chrome/config.css")
         fi
 
-        for file in $INSTALL_FILES; do
+        for file in $SRC_FILES; do
           dirname=$(dirname "$file")
           if [ ! -d "$dirname" ]; then
             mkdir -p "$dirname"
@@ -215,6 +218,8 @@ in {
               echo "Textfox couldn't install itself: File $file already exists and has a different content than the one in the package"
               exit 1
             fi
+          else
+            INSTALL_FILES+=("$file")
           fi
         done
 
@@ -222,9 +227,6 @@ in {
           cp -L "${package}/$file" "$HOME/$PROFILE_DIR/$file"
           chmod 744 "$HOME/$PROFILE_DIR/$file"
         done
-
-        cp -L "${configCss}" "$HOME/$PROFILE_DIR/chrome/config.css"
-        chmod 744 "$HOME/$PROFILE_DIR/chrome/config.css"
       '';
     };
   in lib.mkIf cfg.enable (lib.mkMerge [
