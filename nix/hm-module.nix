@@ -182,7 +182,6 @@ in {
 
         cd "${package}"
         SRC_FILES=$(find . -type f | grep ./chrome)
-        INSTALL_FILES=""
 
         echo "Copying textfox chrome css to $HOME/$PROFILE_DIR";
 
@@ -191,42 +190,19 @@ in {
           mkdir -p "$HOME/$PROFILE_DIR"
         fi
 
-        function file_identical() {
-          lhs=$(cat $1 | $SHA256SUM | $GAWK '{print $1}')
-          rhs=$(cat $2 | $SHA256SUM | $GAWK '{print $1}')
-          [ "$lhs" == "$rhs" ] && echo 1 || echo 0
-        }
-
         cd "$HOME/$PROFILE_DIR"
-
-        if [ -f ./chrome/config.css ]; then
-          if [[ $(file_identical ./chrome/config.css ${configCss}) == 0 ]]; then
-            echo "Textfox couldn't install itself: File $PROFILE_DIR/chrome/config.css already exists and has a different content than the one in the package"
-            exit 1
-          fi
-        else
-          INSTALL_FILES="$INSTALL_FILES chrome/config.css"
-        fi
 
         for file in $SRC_FILES; do
           dirname=$(dirname "$file")
           if [ ! -d "$dirname" ]; then
             mkdir -p "$dirname"
           fi
-          if [ -f "$file" ]; then
-            if [[ $(file_identical $file ${package}/$file) == 0 ]]; then
-              echo "Textfox couldn't install itself: File $file already exists and has a different content than the one in the package"
-              exit 1
-            fi
-          else
-            INSTALL_FILES="$INSTALL_FILES $file"
-          fi
-        done
-
-        for file in $INSTALL_FILES; do
           cp -L "${package}/$file" "$HOME/$PROFILE_DIR/$file"
           chmod 744 "$HOME/$PROFILE_DIR/$file"
         done
+
+        cp -L ${configCss} "$HOME/$PROFILE_DIR/chrome/config.css"
+        chmod 744 "$HOME/$PROFILE_DIR/chrome/config.css"
       '';
     };
   in lib.mkIf cfg.enable (lib.mkMerge [
