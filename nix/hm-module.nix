@@ -167,7 +167,7 @@ in {
       (lib.strings.concatStrings [ " --tf-display-titles: " (if cfg.config.displayTitles then "flex" else "none") ";" ])
       (lib.strings.concatStrings [ " --tf-newtab-logo: " cfg.config.newtabLogo ";" ])
       " }"
-      (if cfg.config.customCss != null then cfg.config.customCss else "")
+      (if cfg.config.customCss != null then "\n${cfg.config.customCss}" else "")
     ]);
 
     linkCfg = {
