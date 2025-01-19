@@ -28,6 +28,12 @@ in {
       default = {};
       type = lib.types.submodule {
         options = {
+          customCss = lib.mkOption {
+            type = lib.types.nullOr lib.types.str;
+            default = null;
+            description = "Custom CSS to apply to the browser";
+            example = "body { background-color: red; }";
+          };
           background = lib.mkOption {
             default = {};
             type = lib.types.submodule {
@@ -161,6 +167,7 @@ in {
       (lib.strings.concatStrings [ " --tf-display-titles: " (if cfg.config.displayTitles then "flex" else "none") ";" ])
       (lib.strings.concatStrings [ " --tf-newtab-logo: " cfg.config.newtabLogo ";" ])
       " }"
+      (if cfg.config.customCss != null then cfg.config.customCss else "")
     ]);
 
     linkCfg = {
