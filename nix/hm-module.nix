@@ -182,7 +182,7 @@ in {
 
         cd "${package}"
         SRC_FILES=$(find . -type f | grep ./chrome)
-        INSTALL_FILES=()
+        INSTALL_FILES=""
 
         echo "Copying textfox chrome css to $HOME/$PROFILE_DIR";
 
@@ -205,7 +205,7 @@ in {
             exit 1
           fi
         else
-          INSTALL_FILES+=("chrome/config.css")
+          INSTALL_FILES="$INSTALL_FILES chrome/config.css"
         fi
 
         for file in $SRC_FILES; do
@@ -219,7 +219,7 @@ in {
               exit 1
             fi
           else
-            INSTALL_FILES+=("$file")
+            INSTALL_FILES="$INSTALL_FILES $file"
           fi
         done
 
