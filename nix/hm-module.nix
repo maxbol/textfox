@@ -19,18 +19,11 @@ in {
       type = lib.types.str;
       description = "The profile to apply the textfox configuration to";
     };
-    copyOnActivation = lib.mkOption (lib.mkMerge [
-      {
-        type = lib.types.bool;
-        default = false;
-        description = "Copy the chrome/ folder into the designated firefox profile on home-manager activation instead of symlinking it. This is for user content styling to fully work on macOS";
-      }
-      (
-        lib.mkIf pkgs.stdenv.hostPlatform.isDarwin {
-          default = true;
-        }
-      )
-    ]);
+    copyOnActivation = lib.mkOption     {
+      type = lib.types.bool;
+      default = pkgs.stdenv.hostPlatform.isDarwin ;
+      description = "Copy the chrome/ folder into the designated firefox profile on home-manager activation instead of symlinking it. This is for user content styling to fully work on macOS";
+    };
     config = lib.mkOption {
       default = {};
       type = lib.types.submodule {
