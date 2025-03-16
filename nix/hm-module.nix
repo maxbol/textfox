@@ -19,7 +19,7 @@ in {
       type = lib.types.str;
       description = "The profile to apply the textfox configuration to";
     };
-    copyOnActivation = lib.mkMerge [
+    copyOnActivation = lib.mkOption (lib.mkMerge [
       {
         type = lib.types.bool;
         default = false;
@@ -30,7 +30,7 @@ in {
           default = true;
         }
       )
-    ] ;
+    ]);
     config = lib.mkOption {
       default = {};
       type = lib.types.submodule {
