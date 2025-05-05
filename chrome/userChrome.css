@@ -18,15 +18,17 @@
 @import url("defaults.css");
 @import url("config.css");
 
-* {
-  font-family: var(--tf-font-family);
-  font-size: var(--tf-font-size);
-}
+@-moz-document url-prefix("chrome://")
+{
+  * {
+    font-family: var(--tf-font-family);
+    font-size: var(--tf-font-size);
+  }
+  body {
+    background-color: var(--tf-bg);
+  }
 
-body {
-  background-color: var(--tf-bg);
-}
-
-::placeholder {
-  text-transform: lowercase;
+  ::placeholder {
+    text-transform: lowercase;
+  }
 }
