@@ -1,5 +1,9 @@
-inputs: {config, lib, pkgs, ...}:
-let 
+inputs: {
+  config,
+  lib,
+  pkgs,
+  ...
+}: let
   cfg = config.textfox;
   inherit (pkgs.stdenv.hostPlatform) system;
   package = inputs.self.packages.${system}.default;
@@ -7,8 +11,23 @@ let
     if pkgs.stdenv.hostPlatform.isDarwin
     then "Library/Application\ Support/Firefox/Profiles/"
     else ".mozilla/firefox/";
-in {
 
+  flattenCss = pkgs.buildNpmPackage {
+    pname = "flatten-css";
+    version = "0.1.0";
+    src = ./flatten-css;
+    npmDepsHash = "sha256-7BLhYa02dutEUx4CGlQ9atFUBbU8vQ3rAIN+ifSwNDE=";
+    dontNpmBuild = true;
+    meta = {
+      mainProgram = "flatten-css";
+    };
+    # postInstall = ''
+    #   mkdir -p $out/bin
+    #   cp $src/flatten-css.sh $out/bin/flatten-css
+    #   sed -i "s|POSTCSS=\"\$SCRIPT_DIR/node_modules/.bin/postcss\"|POSTCSS=\"$out/lib/node_modules/flatten-css/node_modules/.bin/postcss\"|g" $out/bin/flatten-css
+    # '';
+  };
+in {
   imports = [
     inputs.nur.hmModules.nur
   ];
@@ -19,10 +38,16 @@ in {
       type = lib.types.str;
       description = "The profile to apply the textfox configuration to";
     };
-    copyOnActivation = lib.mkOption     {
+    copyOnActivation = lib.mkOption {
       type = lib.types.bool;
-      default = pkgs.stdenv.hostPlatform.isDarwin ;
+      default = pkgs.stdenv.hostPlatform.isDarwin;
       description = "Copy the chrome/ folder into the designated firefox profile on home-manager activation instead of symlinking it. This is for user content styling to fully work on macOS";
+    };
+    flattenCss = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = "When enabled, flattens all CSS imports into two files - userContent.css and userChrome.css - using postcss";
+      example = true;
     };
     config = lib.mkOption {
       default = {};
@@ -149,46 +174,107 @@ in {
 
   config = let
     configCss = pkgs.writeText "config.css" (lib.strings.concatStrings [
-      (if cfg.config.customCss != null then "\n${cfg.config.customCss}" else "")
+      (
+        if cfg.config.customCss != null
+        then "\n${cfg.config.customCss}"
+        else ""
+      )
       ":root {"
-      (lib.strings.concatStrings [ " --tf-font-family: " cfg.config.font.family ";" ])
-      (lib.strings.concatStrings [ " --tf-font-size: " cfg.config.font.size ";" ])
-      (lib.strings.concatStrings [ " --tf-font-accent: " cfg.config.font.accent ";" ])
-      (lib.strings.concatStrings [ " --tf-background: " cfg.config.background.color ";" ])
-      (lib.strings.concatStrings [ " --tf-border-color: " cfg.config.border.color ";" ])
-      (lib.strings.concatStrings [ " --tf-border-transition: " cfg.config.border.transition ";" ])
-      (lib.strings.concatStrings [ " --tf-border-width: " cfg.config.border.width ";" ])
-      (lib.strings.concatStrings [ " --tf-border-radius: " cfg.config.border.radius ";" ])
-      (lib.strings.concatStrings [ " --tf-sidebery-margin: " cfg.config.sidebery.margin ";" ])
-      (lib.strings.concatStrings [ " --tf-display-horizontal-tabs: " (if cfg.config.displayHorizontalTabs then "block" else "none") ";" ])
-      (lib.strings.concatStrings [ " --tf-display-window-controls: " (if cfg.config.displayWindowControls then "flex" else "none") ";" ])
-      (lib.strings.concatStrings [ " --tf-display-nav-buttons: " (if cfg.config.displayNavButtons then "flex" else "none") ";" ])
-      (lib.strings.concatStrings [ " --tf-display-urlbar-icons: " (if cfg.config.displayUrlbarIcons then "flex" else "none") ";" ])
-      (lib.strings.concatStrings [ " --tf-display-customize-sidebar: " (if cfg.config.displaySidebarTools then "flex" else "none") ";" ])
-      (lib.strings.concatStrings [ " --tf-display-titles: " (if cfg.config.displayTitles then "flex" else "none") ";" ])
-      (lib.strings.concatStrings [ " --tf-newtab-logo: " cfg.config.newtabLogo ";" ])
+      (lib.strings.concatStrings [" --tf-font-family: " cfg.config.font.family ";"])
+      (lib.strings.concatStrings [" --tf-font-size: " cfg.config.font.size ";"])
+      (lib.strings.concatStrings [" --tf-font-accent: " cfg.config.font.accent ";"])
+      (lib.strings.concatStrings [" --tf-background: " cfg.config.background.color ";"])
+      (lib.strings.concatStrings [" --tf-border-color: " cfg.config.border.color ";"])
+      (lib.strings.concatStrings [" --tf-border-transition: " cfg.config.border.transition ";"])
+      (lib.strings.concatStrings [" --tf-border-width: " cfg.config.border.width ";"])
+      (lib.strings.concatStrings [" --tf-border-radius: " cfg.config.border.radius ";"])
+      (lib.strings.concatStrings [" --tf-sidebery-margin: " cfg.config.sidebery.margin ";"])
+      (lib.strings.concatStrings [
+        " --tf-display-horizontal-tabs: "
+        (
+          if cfg.config.displayHorizontalTabs
+          then "block"
+          else "none"
+        )
+        ";"
+      ])
+      (lib.strings.concatStrings [
+        " --tf-display-window-controls: "
+        (
+          if cfg.config.displayWindowControls
+          then "flex"
+          else "none"
+        )
+        ";"
+      ])
+      (lib.strings.concatStrings [
+        " --tf-display-nav-buttons: "
+        (
+          if cfg.config.displayNavButtons
+          then "flex"
+          else "none"
+        )
+        ";"
+      ])
+      (lib.strings.concatStrings [
+        " --tf-display-urlbar-icons: "
+        (
+          if cfg.config.displayUrlbarIcons
+          then "flex"
+          else "none"
+        )
+        ";"
+      ])
+      (lib.strings.concatStrings [
+        " --tf-display-customize-sidebar: "
+        (
+          if cfg.config.displaySidebarTools
+          then "flex"
+          else "none"
+        )
+        ";"
+      ])
+      (lib.strings.concatStrings [
+        " --tf-display-titles: "
+        (
+          if cfg.config.displayTitles
+          then "flex"
+          else "none"
+        )
+        ";"
+      ])
+      (lib.strings.concatStrings [" --tf-newtab-logo: " cfg.config.newtabLogo ";"])
       " }"
     ]);
 
-    linkCfg = {
-      home.file."${configDir}${cfg.profile}/chrome" = {
-        source = "${package}/chrome";
-        recursive = true;
-      };
+    srcPackage = shouldFlattenCss:
+      if shouldFlattenCss
+      then (pkgs.runCommand "textfox-flattened" {} ''${lib.getExe flattenCss} "${package}" "${configCss}" "build/" "$out/"'')
+      else package;
 
-      home.file."${configDir}${cfg.profile}/chrome/config.css" = {
-        source = configCss;
-      };
-    };
+    linkCfg = lib.mkMerge [
+      {
+        home.file."${configDir}${cfg.profile}/chrome" = {
+          source = "${srcPackage cfg.flattenCss}/chrome";
+          recursive = true;
+        };
+      }
+      (lib.mkIf (!cfg.flattenCss) {
+        home.file."${configDir}${cfg.profile}/chrome/config.css" = {
+          source = configCss;
+        };
+      })
+    ];
 
     copyOnActivationCfg = {
-      home.activation.copyTextfoxProfile = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
+      home.activation.copyTextfoxProfile = lib.hm.dag.entryAfter ["linkGeneration"] ''
         PROFILE_DIR="${configDir}${cfg.profile}"
-        SHA256SUM="${pkgs.coreutils.out}/bin/sha256sum"
-        GAWK="${pkgs.gawk.out}/bin/awk"
+        SRC_DIR="${srcPackage cfg.flattenCss}"
 
-        cd "${package}"
+        cd "$SRC_DIR"
         SRC_FILES=$(find . -type f | grep ./chrome)
+        echo "Package contents:"
+        echo "$SRC_FILES"
 
         echo "Copying textfox chrome css to $HOME/$PROFILE_DIR";
 
@@ -204,25 +290,32 @@ in {
           if [ ! -d "$dirname" ]; then
             mkdir -p "$dirname"
           fi
-          cp -L "${package}/$file" "$HOME/$PROFILE_DIR/$file"
+          cp -L "$SRC_DIR/$file" "$HOME/$PROFILE_DIR/$file"
           chmod 744 "$HOME/$PROFILE_DIR/$file"
         done
 
-        cp -L ${configCss} "$HOME/$PROFILE_DIR/chrome/config.css"
-        chmod 744 "$HOME/$PROFILE_DIR/chrome/config.css"
+        ${
+          if cfg.flattenCss
+          then ""
+          else ''
+            cp -L ${configCss} "$HOME/$PROFILE_DIR/chrome/config.css"
+              chmod 744 "$HOME/$PROFILE_DIR/chrome/config.css"
+          ''
+        }
       '';
     };
-  in lib.mkIf cfg.enable (lib.mkMerge [
-    {
-      programs.firefox = {
-        enable = true;
-        profiles."${cfg.profile}" = {
-          extensions = [ config.nur.repos.rycee.firefox-addons.sidebery ];
-          extraConfig = builtins.readFile "${package}/user.js";
+  in
+    lib.mkIf cfg.enable (lib.mkMerge [
+      {
+        programs.firefox = {
+          enable = true;
+          profiles."${cfg.profile}" = {
+            extensions = [config.nur.repos.rycee.firefox-addons.sidebery];
+            extraConfig = builtins.readFile "${package}/user.js";
+          };
         };
-      };
-    }
-    (lib.mkIf cfg.copyOnActivation copyOnActivationCfg)
-    (lib.mkIf (!cfg.copyOnActivation) linkCfg)
-  ]);
+      }
+      (lib.mkIf cfg.copyOnActivation copyOnActivationCfg)
+      (lib.mkIf (!cfg.copyOnActivation) linkCfg)
+    ]);
 }
