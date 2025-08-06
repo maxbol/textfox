@@ -101,6 +101,11 @@ in {
             default = true;
             description = "Show titles on blocks";
           };
+          rounding = lib.mkOption {
+            type = lib.types.str;
+            default = "0px";
+            description = "Border radius used throughout the config";
+          };
           newtabLogo = lib.mkOption {
             type = lib.types.str;
             default = "   __            __  ____          \A   / /____  _  __/ /_/ __/___  _  __\A  / __/ _ \\| |/_/ __/ /_/ __ \\| |/_/\A / /_/  __/>  </ /_/ __/ /_/ />  <  \A \\__/\\___/_/|_|\\__/_/  \\____/_/|_|  ";
@@ -189,6 +194,7 @@ in {
       (lib.strings.concatStrings [" --tf-border-width: " cfg.config.border.width ";"])
       (lib.strings.concatStrings [" --tf-border-radius: " cfg.config.border.radius ";"])
       (lib.strings.concatStrings [" --tf-sidebery-margin: " cfg.config.sidebery.margin ";"])
+      (lib.strings.concatStrings [" --tf-rounding: " cfg.config.rounding ";"])
       (lib.strings.concatStrings [
         " --tf-display-horizontal-tabs: "
         (
