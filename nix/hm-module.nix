@@ -316,7 +316,7 @@ in {
         programs.firefox = {
           enable = true;
           profiles."${cfg.profile}" = {
-            extensions = [config.nur.repos.rycee.firefox-addons.sidebery];
+            extensions.packages = [config.nur.repos.rycee.firefox-addons.sidebery];
             extraConfig = builtins.readFile "${package}/user.js";
           };
         };
